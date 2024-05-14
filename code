@@ -1,0 +1,120 @@
+#include <LiquidCrystal.h>
+
+// Define pins for LCD display
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+// Define pins for pressure sensor and buzzer
+const int pressureSensorPin = A0;
+const int buzzerPin = 6;
+
+// Define pins for LED indicator lights
+const int greenLedPin = 7;
+const int redLedPin = 8;
+
+// Define pin for pushbutton
+const int buttonPin = 9;
+
+// Define variables
+int pressureThreshold = 500; // Adjust this threshold based on pressure sensor readings
+bool medicationAvailable = true;
+
+void setup() {
+  // Initialize LCD display
+  lcd.begin(16, 2);
+  
+  // Initialize LED indicator lights
+  pinMode(greenLedPin, OUTPUT);
+  pinMode(redLedPin, OUTPUT);
+  
+  // Initialize pushbutton
+  pinMode(buttonPin, INPUT_PULLUP);
+  
+  // Initialize buzzer
+  pinMode(buzzerPin, OUTPUT);
+}
+
+void loop() {
+  // Display initial message on LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Smart Inhaler");
+  lcd.setCursor(0, 1);
+  lcd.print("Ready for use");
+
+  // Check if medication is available
+  if (medicationAvailable) {
+    // Flash green LED to indicate readiness
+    flashLed(greenLedPin);
+    
+    // Check if button is pressed to simulate inhalation
+    if (digitalRead(buttonPin) == LOW) {
+      // Dispense medication if pressure threshold is met
+      if (readPressure() > pressureThreshold) {
+        dispenseMedication();
+        // Display message on LCD
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Medication dispensed");
+        // Play success tone
+        playTone();
+        delay(2000); // Delay to display message
+        // Reset medication availability
+        medicationAvailable = false;
+      } else {
+        // Display message on LCD if pressure threshold is not met
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Inhale forcefully");
+        lcd.setCursor(0, 1);
+        lcd.print("Try again");
+        // Play error tone
+        playErrorTone();
+        delay(2000); // Delay to display message
+      }
+    }
+  } else {
+    // Flash red LED to indicate low medication
+    flashLed(redLedPin);
+    
+    // Display message on LCD if medication is not available
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Out of medication");
+    lcd.setCursor(0, 1);
+    lcd.print("Refill required");
+    delay(2000); // Delay to display message
+    medicationAvailable = true; // Reset medication availability
+  }
+}
+
+// Function to read pressure sensor value
+int readPressure() {
+  return analogRead(pressureSensorPin);
+}
+
+// Function to dispense medication
+void dispenseMedication() {
+  // Simulate medication dispensing action
+  // You can add actual motor control or other mechanisms here
+  // For simulation, just delay for a few seconds
+  delay(3000);
+}
+
+// Function to flash LED
+void flashLed(int pin) {
+  digitalWrite(pin, HIGH);
+  delay(500);
+  digitalWrite(pin, LOW);
+  delay(500);
+}
+
+// Function to play success tone
+void playTone() {
+  tone(buzzerPin, 1000, 200);
+}
+
+// Function to play error tone
+void playErrorTone() {
+  tone(buzzerPin, 200, 500);
+}
